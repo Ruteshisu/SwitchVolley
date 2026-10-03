@@ -219,7 +219,8 @@ SV.Match = class {
     const cands = this.teamPlayers(opp);
     let best = null, bd = 1e9;
     cands.forEach((p) => {
-      const d = Math.hypot(p.pos.x - pr.pos.x, p.pos.z - pr.pos.z) + (p.airborne ? 2.5 : 0);
+      // セッター役はなるべく1本目を取らない（トスに回る）
+      const d = Math.hypot(p.pos.x - pr.pos.x, p.pos.z - pr.pos.z) + (p.airborne ? 2.5 : 0) + (p.opt.setter ? 1.8 : 0);
       if (d < bd) { bd = d; best = p; }
     });
     // AI はアウトになる球を見送る
