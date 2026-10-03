@@ -165,7 +165,7 @@ SV.Arena = class {
   buildCeiling() {
     const s = this.scene;
     // 大型ビジョン
-    this.screen = SV.textures.scoreScreen();
+    this.screen = SV.textures.scoreScreen(SV.TEAMS);
     const frame = new THREE.Mesh(new THREE.BoxGeometry(10.6, 5.6, 0.4), new THREE.MeshLambertMaterial({ color: 0x111111 }));
     frame.position.set(0, 13.5, -24.2); s.add(frame);
     const scr = new THREE.Mesh(new THREE.PlaneGeometry(10, 5), new THREE.MeshBasicMaterial({ map: this.screen.tex }));

@@ -15,6 +15,7 @@ SV.Player = class {
     this.human = false; this.manualT = 0; this.lockMove = 0;
     this.look = null;                         // 向く点（null ならボール）
   }
+  get opt() { return this.char.opt; }
   get airborne() { return this.y > 0.0001 || this.vy > 0; }
   place(x, z) { this.pos.set(x, 0, z); this.target.copy(this.pos); this.y = 0; this.vy = 0; this.jumpVel.set(0, 0, 0); }
   setTarget(x, z) { this.target.set(x, 0, z); }
@@ -80,14 +81,8 @@ SV.Match = class {
     this.timeScale = 1;
     this.slowReal = 0;
     this.t = 0;
-    const T = SV.CONFIG.TEAM_COLORS;
-    const looks = [
-      { colors: T[0], skin: 0xf1c7a5, hair: 0x2b1a0e, hairStyle: 'short', number: 1 },
-      { colors: T[0], skin: 0xe0ac85, hair: 0xe8c15a, hairStyle: 'pony', number: 7 },
-      { colors: T[1], skin: 0xc98e62, hair: 0x15151a, hairStyle: 'spiky', number: 3 },
-      { colors: T[1], skin: 0xf5d0b0, hair: 0x8a3b1e, hairStyle: 'bob', number: 9 },
-    ];
-    this.players = looks.map((lk, i) => new SV.Player(world.scene, i < 2 ? 0 : 1, i % 2, lk));
+    // roster.js の並び：チーム0 の2人 → チーム1 の2人（チーム0 の先頭が人間操作）
+    this.players = SV.ROSTER.map((lk, i) => new SV.Player(world.scene, lk.team, i % 2, lk));
     this.ball.onFloor = (p) => this.onBallFloor(p);
     this.ball.onNet = () => this.onBallNet();
     this.onEnd = null;
@@ -170,7 +165,7 @@ SV.Match = class {
     this.safeLaunch({ x: tgt.x, y: SV.CONFIG.PHYS.BALL_R, z: tgt.z }, T, q === 'PERFECT' ? 0x9fd4ff : null);
     SV.audio.play('serve');
     this.fx.burst(this.ball.p, 0xffffff, 10, 3);
-    if (q === 'PERFECT') { SV.ui.sub('JUMP SERVE!'); this.w.cam.shake(0.4); }
+    if (q === 'PERFECT') { SV.ui.sub(p.opt.name + ' のジャンプサーブ！'); this.w.cam.shake(0.4); }
     this.judge(p, q);
     this.lastKind = 'serve';
     this.lastTouchTeam = st;
@@ -253,8 +248,9 @@ SV.Match = class {
       const reachable = dist <= P.SPEED * Math.max(0, pr.t - A.REACTION);
       let ok = reachable;
       if (kind === 'receive') ok = reachable && SV.AI.receiveSuccess(plan.difficulty, this.demo ? -0.05 : 0);
-      else if (kind === 'set' || kind === 'free') ok = reachable && Math.random() < A.SET_SUCCESS;
+      else if (kind === 'set' || kind === 'free') ok = reachable && Math.random() < (player.opt.setter ? 0.995 : A.SET_SUCCESS);
       plan.aiQ = SV.AI.quality(ok);
+      if (ok && kind === 'set' && player.opt.setter) plan.aiQ = 'PERFECT';
       if (kind === 'spike') plan.aiQ = reachable ? 'GOOD' : 'MISS';
     }
     // 移動先：ボールが体の前に来るよう少し後ろ
@@ -266,7 +262,7 @@ SV.Match = class {
     if (kind === 'spike') player.char.setPose('ready');
     else player.char.setPose('ready');
     this.plan = plan;
-    this.fx.showMarker(plan.pos, player.team === 0 ? 0x6fb6ff : 0xff7a6b);
+    this.fx.showMarker(plan.pos, SV.TEAMS[player.team].mark);
     // 他の選手の配置
     const mate = this.mate(player);
     const SH = SV.CONFIG.SHOT;
@@ -351,7 +347,12 @@ SV.Match = class {
       const err = q === 'PERFECT' ? 0.08 : q === 'GOOD' ? 0.3 : 0.9;
       const side = plan.attackSide || 1;
       this.setQ = q;
-      b.launch({ x: side * SH.ATTACK_POS.x + SV.util.rand(-err, err), y: SH.CONTACT_SPIKE, z: s * (SH.ATTACK_POS.z + SV.util.rand(-err * 0.3, err * 0.5)) }, SH.SET_T);
+      // 速攻：セッターが quickSet、アタッカーが quickHitter で、トスが乱れていない時
+      const mate = this.mate(p);
+      this.quick = !low && q !== 'OK' && p.opt.quickSet && mate.opt.quickHitter;
+      const ax = this.quick ? side * 1.4 : side * SH.ATTACK_POS.x;
+      b.launch({ x: ax + SV.util.rand(-err, err), y: SH.CONTACT_SPIKE, z: s * (SH.ATTACK_POS.z + SV.util.rand(-err * 0.3, err * 0.5)) }, this.quick ? SH.QUICK_SET_T : SH.SET_T);
+      if (this.quick) SV.ui.sub('速攻！', 1.0);
       this.lastKind = 'set';
       this.touch = { team, count: 2, last: p };
     } else if (plan.kind === 'free') {
@@ -372,7 +373,8 @@ SV.Match = class {
     let power; // super | strong | weak | feint
     if (p.human) power = q === 'PERFECT' ? 'super' : q === 'GOOD' ? 'strong' : q === 'OK' ? 'weak' : 'feint';
     else {
-      const rate = SV.CONFIG.AI.SPIKE_SUPER_RATE * (this.setQ === 'PERFECT' ? 1.4 : 1);
+      const base = p.opt.superRate != null ? p.opt.superRate : SV.CONFIG.AI.SPIKE_SUPER_RATE;
+      const rate = base * (this.setQ === 'PERFECT' ? 1.3 : 1) * (this.quick ? 1.3 : 1);
       power = this.forceSuper || Math.random() < rate ? 'super' : Math.random() < 0.12 ? 'feint' : 'strong';
       this.forceSuper = false;
     }
@@ -387,6 +389,7 @@ SV.Match = class {
     const trail = power === 'super' ? 0xff6a1a : power === 'strong' ? 0xffffff : null;
     this.safeLaunch({ x: tgt.x, y: SV.CONFIG.PHYS.BALL_R, z: tgt.z }, T, trail);
     this.lastKind = power === 'super' ? 'super' : 'spike';
+    this.quick = false;
     this.lastTouchTeam = p.team;
     this.touch = { team: p.team, count: 3, last: p };
     if (power === 'super') {
@@ -395,7 +398,8 @@ SV.Match = class {
       this.timeScale = SV.CONFIG.SLOWMO_SCALE;
       this.w.cam.setMode('cine', p.pos, s);
       this.w.cam.shake(1);
-      SV.ui.banner('SUPER SPIKE!!', p.team === 0 ? 'blue' : 'red', 1.6);
+      SV.ui.banner(this.quick ? '変人速攻!!' : 'SUPER SPIKE!!', p.team === 0 ? 'blue' : 'red', 1.6);
+      SV.ui.sub(p.opt.name + (p.opt.lefty ? ' の左の大砲！' : ' のスーパースパイク！'), 1.6);
       this.fx.burst(b.p, 0xff9a2a, 26, 7, 0.32);
       this.fx.burst(b.p, 0xffffff, 10, 5, 0.2);
       this.w.arena.cheer(1);
@@ -530,8 +534,9 @@ SV.Match = class {
     SV.audio.play('cheer', 1);
     this.w.arena.cheer(1);
     const humanWin = this.human ? winner === this.human.team : null;
-    SV.ui.banner(this.demo ? (winner === 0 ? 'BLUE WINS!' : 'RED WINS!') : humanWin ? 'YOU WIN!' : 'YOU LOSE...', winner === 0 ? 'blue' : 'red', 3.5);
-    this.w.arena.setScore(this.score[0], this.score[1], (winner === 0 ? 'BLUE' : 'RED') + ' WINS!');
+    const wname = SV.TEAMS[winner].name;
+    SV.ui.banner(this.demo ? wname + ' WIN!' : humanWin ? 'YOU WIN!' : 'YOU LOSE...', winner === 0 ? 'blue' : 'red', 3.5);
+    this.w.arena.setScore(this.score[0], this.score[1], wname + ' WIN!');
   }
 
   judge(p, q) {
@@ -572,7 +577,8 @@ SV.Match = class {
         } else if (this.ball.p.y < 1.25 && this.ball.v.y < 0) this.hitServe('OK', dir);
       } else {
         if (!this.aiServeAt) this.aiServeAt = peak + SV.util.rand(-0.05, 0.05);
-        if (tp >= this.aiServeAt) { this.aiServeAt = 0; this.hitServe(Math.random() < (this.demo ? 0.35 : 0.25) ? 'PERFECT' : 'GOOD', null); }
+        const strong = this.server.opt.serveStrong != null ? this.server.opt.serveStrong : 0.25;
+        if (tp >= this.aiServeAt) { this.aiServeAt = 0; this.hitServe(Math.random() < strong ? 'PERFECT' : 'GOOD', null); }
       }
       if (this.phase === 'serveToss' && tp > peak - 0.25) this.server.char.setPose('serveWind');
     } else if (this.phase === 'rally') {

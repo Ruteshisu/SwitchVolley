@@ -44,6 +44,7 @@
     _v.copy(p).project(camera);
     return { x: (_v.x + 1) / 2 * CFG.WIDTH, y: (1 - _v.y) / 2 * CFG.HEIGHT };
   };
+  SV.ui.setTeams(SV.TEAMS);
   const match = new SV.Match(world);
   SV.match = match; SV.world = world; // デバッグ用
 

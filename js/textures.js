@@ -100,19 +100,20 @@ SV.textures = (function () {
   }
 
   // 大型ビジョン（スコア表示を書き換えるため canvas を返す）
-  function scoreScreen() {
+  // teams: [{name, css}, {name, css}]
+  function scoreScreen(teams) {
     const c = canvas(512, 256);
     const tex = toTex(c);
     function draw(a, b, msg) {
       const g = c.getContext('2d');
       g.fillStyle = '#05070f'; g.fillRect(0, 0, 512, 256);
-      g.fillStyle = '#1747c9'; g.fillRect(0, 0, 256, 60);
-      g.fillStyle = '#c71e2b'; g.fillRect(256, 0, 256, 60);
+      g.fillStyle = teams[0].css; g.fillRect(0, 0, 256, 60);
+      g.fillStyle = teams[1].css; g.fillRect(256, 0, 256, 60);
       g.fillStyle = '#fff'; g.font = '900 40px Segoe UI, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
-      g.fillText('BLUE', 128, 32); g.fillText('RED', 384, 32);
+      g.fillText(teams[0].name, 128, 32); g.fillText(teams[1].name, 384, 32);
       g.font = '900 130px Segoe UI, sans-serif';
-      g.fillStyle = '#6fb6ff'; g.fillText(String(a), 128, 150);
-      g.fillStyle = '#ff7a6b'; g.fillText(String(b), 384, 150);
+      g.fillStyle = teams[0].css; g.fillText(String(a), 128, 150);
+      g.fillStyle = teams[1].css; g.fillText(String(b), 384, 150);
       g.fillStyle = '#ffe14a'; g.font = 'italic 900 34px Segoe UI, sans-serif';
       g.fillText(msg || 'SPIKE STADIUM', 256, 230);
       tex.needsUpdate = true;
@@ -166,14 +167,14 @@ SV.textures = (function () {
   }
 
   // 背番号入りユニフォーム
-  function jersey(main, sub, num) {
+  function jersey(main, sub, num, numColor) {
     const c = canvas(256, 256), g = c.getContext('2d');
     g.fillStyle = main; g.fillRect(0, 0, 256, 256);
     g.fillStyle = sub; g.fillRect(0, 30, 256, 14); g.fillRect(0, 212, 256, 10);
     g.font = '900 110px Segoe UI, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
     g.lineWidth = 8; g.strokeStyle = 'rgba(0,0,0,.35)';
     // 胸と背中（円筒 UV の 1/4 と 3/4 付近）
-    for (const x of [64, 192]) { g.strokeText(num, x, 130); g.fillStyle = sub; g.fillText(num, x, 130); }
+    for (const x of [64, 192]) { g.strokeText(num, x, 130); g.fillStyle = numColor || sub; g.fillText(num, x, 130); }
     return toTex(c);
   }
 

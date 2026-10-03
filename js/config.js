@@ -27,6 +27,7 @@ SV.CONFIG = {
     SERVE_T: 1.55, SERVE_STRONG_T: 1.05,
     RECEIVE_T: 1.25,      // レシーブ → セッター
     SET_T: 1.05,          // トス → アタッカー
+    QUICK_SET_T: 0.72,    // 速攻トス（低く速い）
     SPIKE_T: 0.62, SUPER_SPIKE_T: 0.42, FEINT_T: 1.1,
     SERVE_TOSS_V: 5.6,    // サーブトスの打ち上げ速度
     CONTACT_LOW: 0.85,    // レシーブ接触高さ
@@ -74,8 +75,5 @@ SV.CONFIG = {
   AUTO_MOVE: true,
   SLOWMO_SCALE: 0.22,
   SLOWMO_TIME: 1.1,           // 実時間秒
-  TEAM_COLORS: [
-    { main: 0x2f6bff, sub: 0xffffff, accent: 0x0c2a8a, css: '#2f7bff', name: 'BLUE' },
-    { main: 0xff3b30, sub: 0xffe9a8, accent: 0x8a120c, css: '#ff4a3d', name: 'RED' },
-  ],
+  // チーム名・色・キャラは js/roster.js
 };

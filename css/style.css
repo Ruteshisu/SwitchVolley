@@ -39,8 +39,9 @@ html, body {
   color: #ffe14a;
 }
 #banner.show { opacity: 1; transform: scale(1); }
-#banner.blue { color: #6fb6ff; text-shadow: 0 6px 0 rgba(0,0,0,.35), 0 0 30px rgba(60,140,255,.8); }
-#banner.red  { color: #ff7a6b; text-shadow: 0 6px 0 rgba(0,0,0,.35), 0 0 30px rgba(255,80,60,.8); }
+/* blue = チーム0（オレンジ系）, red = チーム1（ターコイズ系）。クラス名は互換のため据え置き */
+#banner.blue { color: #ffa04a; text-shadow: 0 6px 0 rgba(0,0,0,.35), 0 0 30px rgba(255,130,30,.8); }
+#banner.red  { color: #5fe6d6; text-shadow: 0 6px 0 rgba(0,0,0,.35), 0 0 30px rgba(40,200,190,.8); }
 #subBanner {
   position: absolute; top: 320px; width: 100%; text-align: center; font-size: 30px; font-weight: 800;
   opacity: 0; transition: opacity .2s; text-shadow: 0 3px 6px rgba(0,0,0,.7);

@@ -57,7 +57,13 @@ SV.ui = (function () {
     if (sc) $('resultScore').textContent = sc;
   }
   function soundNote(show) { $('soundNote').classList.toggle('hidden', !show); }
+  // チーム名と色を HUD に反映
+  function setTeams(teams) {
+    $('nameA').textContent = teams[0].name; $('nameB').textContent = teams[1].name;
+    document.querySelector('#scoreboard .blue').style.background = `linear-gradient(90deg, ${teams[0].css2}, ${teams[0].css})`;
+    document.querySelector('#scoreboard .red').style.background = `linear-gradient(90deg, ${teams[1].css}, ${teams[1].css2})`;
+  }
   function scoreboard(show) { $('scoreboard').style.display = show ? '' : 'none'; }
 
-  return { banner, sub, hint, judge, score, matchPoint, title, demoTag, pause, result, soundNote, scoreboard };
+  return { setTeams, banner, sub, hint, judge, score, matchPoint, title, demoTag, pause, result, soundNote, scoreboard };
 })();
