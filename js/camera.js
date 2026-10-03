@@ -40,8 +40,8 @@ SV.CameraRig = class {
       k = 6;
     } else if (this.mode === 'point') {
       const f = this.focus;
-      this.tPos.set(f.x * 0.6, 4.2, f.z + this.side * 7.5);
-      this.tLook.set(f.x * 0.8, 1.2, f.z);
+      this.tPos.set(f.x * 0.6, 5.6, f.z + this.side * 6.5);
+      this.tLook.set(f.x * 0.8, 1.0, f.z);
       k = 1.8;
     } else if (this.mode === 'win') {
       this.orbitA += dt * 0.35;

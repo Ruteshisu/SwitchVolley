@@ -29,16 +29,16 @@ SV.debug = (function () {
         if (!H) return;
         const now = m.t;
         if (m.phase === 'serveReady' && m.server === H && m.phaseT > 0.6) key('toss' + m.score);
-        if (m.phase === 'serveToss' && m.server === H && now - m.tossT >= 5.6 / m.ball.g - 0.03) key('serve' + m.tossT);
+        if (m.phase === 'serveToss' && m.server === H && now - m.tossT >= SV.CONFIG.SHOT.SERVE_TOSS_V / m.ball.g - 0.02) key('serve' + m.tossT);
         const p = m.plan;
         if (m.phase === 'rally' && p && p.player === H) {
           if (p.kind === 'spike') {
-            if (!p.jumped && p.tc - now <= 0.42) key('jump' + p.tc);
+            if (!p.jumped && p.tc - now <= SV.Match.JUMP_PEAK + 0.02) key('jump' + p.tc);
             if (p.jumped && p.tc - now <= 0.02) key('hit' + p.tc);
           } else if (p.tc - now <= 0.02) key('t' + p.tc);
         }
         const o = m.oppSpike;
-        if (m.phase === 'rally' && o && o.blk.player === H && m.plan === o.plan && o.plan.tc - now <= 0.42) key('blk' + o.plan.tc);
+        if (m.phase === 'rally' && o && o.blk.player === H && m.plan === o.plan && o.plan.tc - now <= SV.Match.JUMP_PEAK + 0.02) key('blk' + o.plan.tc);
       })();
     }
   }

@@ -35,7 +35,7 @@ SV.Player = class {
     const P = SV.CONFIG.PLAYER, C = SV.CONFIG.COURT;
     let vx = 0, vz = 0;
     if (this.airborne) {
-      this.vy -= 13 * dt; this.y += this.vy * dt;
+      this.vy -= P.JUMP_G * dt; this.y += this.vy * dt;
       this.pos.addScaledVector(this.jumpVel, dt);
       if (this.y <= 0) { this.y = 0; this.vy = 0; this.jumpVel.set(0, 0, 0); this.lockMove = 0.12; }
     } else if (this.lockMove > 0) {
@@ -70,6 +70,9 @@ SV.Player = class {
 };
 
 SV.Match = class {
+  // ジャンプしてから頂点までの時間（スパイク・ブロックの跳ぶタイミング）
+  static get JUMP_PEAK() { return SV.CONFIG.PLAYER.JUMP_V / SV.CONFIG.PLAYER.JUMP_G; }
+
   constructor(world) {
     this.w = world;
     this.ball = world.ball;
@@ -146,7 +149,7 @@ SV.Match = class {
   tossServe() {
     const p = this.server;
     this.ball.p.set(p.pos.x, 1.45, p.pos.z - p.s * 0.45);
-    this.ball.throwUp(5.6);
+    this.ball.throwUp(SV.CONFIG.SHOT.SERVE_TOSS_V);
     this.tossT = this.t;
     this.phase = 'serveToss';
     p.char.setPose('serveToss');
@@ -298,7 +301,7 @@ SV.Match = class {
     const def = 1 - plan.team;
     const { front, back } = this.assignDefense(def, plan.pos.x);
     const blk = { player: front, digger: back, jumpAt: null };
-    if (!front.human && SV.AI.willBlock()) blk.jumpAt = plan.tc - 0.4 + SV.util.rand(-0.06, 0.08);
+    if (!front.human && SV.AI.willBlock()) blk.jumpAt = plan.tc - SV.Match.JUMP_PEAK + SV.util.rand(-0.06, 0.08);
     this.oppSpike = { plan, blk };
   }
 
@@ -415,7 +418,7 @@ SV.Match = class {
       if (tn > 0) {
         const atNet = SV.util.posAt(b.p, b.v, tn, b.g);
         // ブロッカーがその時点で空中にいるか（現在の状態から簡易予測）
-        const yAt = blocker.y + blocker.vy * tn - 6.5 * tn * tn;
+        const yAt = blocker.y + blocker.vy * tn - 0.5 * SV.CONFIG.PLAYER.JUMP_G * tn * tn;
         const inAir = blocker.airborne && yAt > 0.25;
         const near = Math.abs(blocker.pos.x - atNet.x) < SV.CONFIG.PLAYER.BLOCK_REACH_X;
         const high = atNet.y < SV.CONFIG.COURT.NET_H + 1.05;
@@ -559,13 +562,13 @@ SV.Match = class {
         if (action || this.phaseT > 12) this.tossServe();
       } else if (this.phaseT > this.serveDelay) this.tossServe();
     } else if (this.phase === 'serveToss') {
-      const tp = this.t - this.tossT, peak = 5.6 / this.ball.g;
+      const tp = this.t - this.tossT, peak = SV.CONFIG.SHOT.SERVE_TOSS_V / this.ball.g;
       if (this.server.human) {
         manual = null;
         if (action && tp > 0.15) {
           const d = Math.abs(tp - peak);
           const T = SV.CONFIG.TIMING;
-          this.hitServe(d < T.PERFECT * 1.6 ? 'PERFECT' : d < T.GOOD * 1.4 ? 'GOOD' : 'OK', dir);
+          this.hitServe(d < T.SERVE_PERFECT ? 'PERFECT' : d < T.SERVE_GOOD ? 'GOOD' : 'OK', dir);
         } else if (this.ball.p.y < 1.25 && this.ball.v.y < 0) this.hitServe('OK', dir);
       } else {
         if (!this.aiServeAt) this.aiServeAt = peak + SV.util.rand(-0.05, 0.05);
@@ -621,7 +624,7 @@ SV.Match = class {
           if (!p.airborne) {
             plan.jumped = true;
             const tgt = { x: plan.pos.x, z: plan.pos.z + p.s * 0.35 };
-            p.jump(SV.CONFIG.PLAYER.JUMP_V, tgt, 0.4);
+            p.jump(SV.CONFIG.PLAYER.JUMP_V, tgt, SV.Match.JUMP_PEAK);
             p.char.setPose('spikeWind'); SV.audio.play('jump');
           }
         } else {
@@ -651,9 +654,9 @@ SV.Match = class {
       const rem = plan.tc - now;
       if (plan.kind === 'spike') {
         if (rem < 1.0 && !plan.jumped) p.char.setPose('approach');
-        if (rem <= 0.4 && !plan.jumped) {
+        if (rem <= SV.Match.JUMP_PEAK && !plan.jumped) {
           plan.jumped = true;
-          p.jump(SV.CONFIG.PLAYER.JUMP_V, { x: plan.pos.x, z: plan.pos.z + p.s * 0.35 }, 0.4);
+          p.jump(SV.CONFIG.PLAYER.JUMP_V, { x: plan.pos.x, z: plan.pos.z + p.s * 0.35 }, SV.Match.JUMP_PEAK);
           p.char.setPose('spikeWind'); SV.audio.play('jump');
         }
       } else if (rem < 0.35) {
@@ -676,7 +679,7 @@ SV.Match = class {
       const pl = this.plan;
       if (pl && pl.player === H) {
         if (pl.kind === 'spike') {
-          if (!pl.jumped) { hint = `${k(A)} でジャンプ！`; ring = pl.tc - 0.4 - this.t; }
+          if (!pl.jumped) { hint = `${k(A)} でジャンプ！`; ring = pl.tc - SV.Match.JUMP_PEAK - this.t; }
           else { hint = `${k(A)} で打つ！ 矢印で狙い`; ring = pl.tc - this.t; }
         } else {
           hint = `輪が重なったら ${k(A)}（${pl.kind === 'set' ? 'トス' : 'レシーブ'}）`;
@@ -684,7 +687,7 @@ SV.Match = class {
         }
       } else if (this.oppSpike && this.oppSpike.blk.player === H && this.plan === this.oppSpike.plan) {
         hint = `${k(A)} でブロック！ ←→で位置`;
-        ring = this.oppSpike.plan.tc - 0.4 - this.t;
+        ring = this.oppSpike.plan.tc - SV.Match.JUMP_PEAK - this.t;
       }
     }
     SV.ui.hint(hint);

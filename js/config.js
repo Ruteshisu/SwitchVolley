@@ -27,8 +27,8 @@ SV.CONFIG = {
     SERVE_T: 1.55, SERVE_STRONG_T: 1.05,
     RECEIVE_T: 1.25,      // レシーブ → セッター
     SET_T: 1.05,          // トス → アタッカー
-    SPIKE_T: 0.62, SUPER_SPIKE_T: 0.42, FEINT_T: 1.1, PUSH_T: 1.3,
-    DIG_T: 1.3,
+    SPIKE_T: 0.62, SUPER_SPIKE_T: 0.42, FEINT_T: 1.1,
+    SERVE_TOSS_V: 5.6,    // サーブトスの打ち上げ速度
     CONTACT_LOW: 0.85,    // レシーブ接触高さ
     CONTACT_SET: 2.1,     // トス接触高さ
     CONTACT_SPIKE: 2.95,  // スパイク打点
@@ -41,23 +41,22 @@ SV.CONFIG = {
     PERFECT: 0.075,
     GOOD: 0.17,
     OK: 0.3,
-    SPIKE_JUMP_EARLY: 1.0,  // 接触の何秒前からジャンプ受付
-    SPIKE_JUMP_LATE: 0.12,
-    BLOCK_EARLY: 0.75,
-    BLOCK_LATE: 0.05,
+    SERVE_PERFECT: 0.12,    // サーブはトス頂点との差で判定
+    SERVE_GOOD: 0.24,
   },
 
   PLAYER: {
     SPEED: 6.2,           // 自動移動速度 m/s
     MANUAL_SPEED: 5.0,
     REACH: 1.15,          // 接触可能な水平距離
-    JUMP_V: 5.2,          // ジャンプ初速 → 頂点 ~1.38m / 0.53s
+    JUMP_V: 5.2,          // ジャンプ初速
+    JUMP_G: 13,           // キャラの重力 → 頂点 約1.04m / 0.4秒後
     BLOCK_REACH_X: 0.85,
   },
 
   AI: {
     // 成功率（難しさ 0〜1 に対して線形補間）
-    RECEIVE_EASY: 0.97, RECEIVE_HARD: 0.32,
+    RECEIVE_EASY: 0.97, RECEIVE_HARD: 0.42,
     SET_SUCCESS: 0.97,
     SPIKE_SUPER_RATE: 0.45,   // AI がスーパースパイクを打つ割合
     BLOCK_RATE: 0.55,         // ブロックに跳ぶ割合
