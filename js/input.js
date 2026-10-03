@@ -25,7 +25,7 @@ SV.input = (function () {
     if (ACTION_KEYS.includes(e.code)) actionHeld = false;
   });
   window.addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
-  window.addEventListener('pointerdown', () => emit('any'));
+  document.getElementById('stage').addEventListener('pointerdown', () => emit('any'));
 
   // ---- 仮想パッド ----
   function setupVirtualPad() {

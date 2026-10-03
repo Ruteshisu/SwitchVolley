@@ -170,9 +170,19 @@ SV.Arena = class {
     frame.position.set(0, 13.5, -24.2); s.add(frame);
     const scr = new THREE.Mesh(new THREE.PlaneGeometry(10, 5), new THREE.MeshBasicMaterial({ map: this.screen.tex }));
     scr.position.set(0, 13.5, -23.95); s.add(scr);
-    // 奥の壁
-    const wall = new THREE.Mesh(new THREE.PlaneGeometry(60, 30), new THREE.MeshLambertMaterial({ color: 0x18223a }));
-    wall.position.set(0, 12, -24.5); s.add(wall);
+    // 体育館の壁と天井（内側から見える箱）
+    const hall = new THREE.Mesh(new THREE.BoxGeometry(64, 26, 60),
+      new THREE.MeshLambertMaterial({ color: 0x1c2742, side: THREE.BackSide }));
+    hall.position.set(0, 12.99, 5.5); s.add(hall);
+    // 壁の帯（チームカラー）
+    for (const [c, y] of [[0x2f6bff, 7.5], [0xff3b30, 8.3]]) {
+      const mat = new THREE.MeshBasicMaterial({ color: c });
+      const walls = [[0, -24.4, 0, 64], [-31.9, 5.5, Math.PI / 2, 60], [31.9, 5.5, -Math.PI / 2, 60], [0, 35.4, Math.PI, 64]];
+      walls.forEach(([x, z, r, w]) => {
+        const m = new THREE.Mesh(new THREE.PlaneGeometry(w, 0.4), mat);
+        m.position.set(x, y, z); m.rotation.y = r; s.add(m);
+      });
+    }
     // 天井の照明リグ（発光スプライト）
     const glowMat = new THREE.SpriteMaterial({ map: SV.textures.glow(), color: 0xfff4d0, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending });
     const trussMat = new THREE.MeshLambertMaterial({ color: 0x333a4a });

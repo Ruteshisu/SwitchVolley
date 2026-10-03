@@ -97,15 +97,10 @@ SV.Character = class {
       this.legs.push({ hp, kn, side: sx });
     }
 
-    // 足元の影（ジャンプ時に地面に残す）
-    this.shadow = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 0.9),
-      new THREE.MeshBasicMaterial({ map: SV.Character.blobTex(), transparent: true, depthWrite: false }));
-    this.shadow.rotation.x = -Math.PI / 2;
-    this.shadow.position.y = 0.02;
     // 頭上のマーカー（操作キャラ用）
-    this.marker = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.22, 4), new THREE.MeshBasicMaterial({ color: 0xffe14a }));
+    this.marker = new THREE.Mesh(new THREE.ConeGeometry(0.2, 0.36, 4), new THREE.MeshBasicMaterial({ color: 0xffe14a }));
     this.marker.rotation.x = Math.PI;
-    this.marker.position.y = 2.35;
+    this.marker.position.y = 2.45;
     this.marker.visible = false;
     this.root.add(this.marker);
   }
@@ -181,7 +176,7 @@ SV.Character = class {
     L[0].hp.rotation.z = -P.legSpread; L[1].hp.rotation.z = P.legSpread;
     if (this.pony) this.pony.rotation.x = Math.sin(this.runPhase * 0.5) * 0.2 * this.runAmt + (airborne ? 0.4 : 0);
     this.root.rotation.y = SV.util.dampAngle(this.root.rotation.y, this.facing, 10, dt);
-    this.marker.position.y = 2.35 + Math.sin(performance.now() / 200) * 0.06;
+    this.marker.position.y = 2.45 + Math.sin(performance.now() / 200) * 0.06;
   }
 };
 

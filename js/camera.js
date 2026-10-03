@@ -29,8 +29,8 @@ SV.CameraRig = class {
     if (this.mode === 'play' || this.mode === 'demo') {
       const bx = ball.p.x, bz = ball.p.z;
       const sway = this.mode === 'demo' ? Math.sin(this.time * 0.25) * 1.5 : 0;
-      this.tPos.set(bx * 0.35 + sway, 6.2 + Math.max(0, ball.p.y - 3) * 0.15, 15.8 + Math.max(0, bz) * 0.12);
-      this.tLook.set(bx * 0.4, 1.4, -1.5 + bz * 0.18);
+      this.tPos.set(bx * 0.4 + sway, 4.4 + Math.max(0, ball.p.y - 3) * 0.12, 12.4 + Math.max(0, bz) * 0.1);
+      this.tLook.set(bx * 0.5, 1.7, -2.6 + bz * 0.2);
       k = 2.5;
     } else if (this.mode === 'cine') {
       // スーパースパイク：アタッカーを横から煽る

@@ -7,7 +7,7 @@ SV.Player = class {
     this.team = team; this.idx = idx;
     this.s = team === 0 ? 1 : -1;           // 自コート側の z 符号
     this.char = new SV.Character(look);
-    scene.add(this.char.root); scene.add(this.char.shadow);
+    scene.add(this.char.root);
     this.pos = new THREE.Vector3();
     this.target = new THREE.Vector3();
     this.jumpVel = new THREE.Vector3();
@@ -58,9 +58,6 @@ SV.Player = class {
 
     const ch = this.char;
     ch.root.position.set(this.pos.x, this.y, this.pos.z);
-    ch.shadow.position.set(this.pos.x, 0.02, this.pos.z);
-    const ss = Math.max(0.5, 1 - this.y * 0.35);
-    ch.shadow.scale.set(ss, ss, ss);
     // 向き：ボール（または look）方向、ただしネット方向から ±75° 以内
     const lp = this.look || ballPos;
     const netYaw = this.s > 0 ? Math.PI : 0;
@@ -396,8 +393,8 @@ SV.Match = class {
       this.w.cam.setMode('cine', p.pos, s);
       this.w.cam.shake(1);
       SV.ui.banner('SUPER SPIKE!!', p.team === 0 ? 'blue' : 'red', 1.6);
-      this.fx.burst(b.p, 0xff9a2a, 40, 6, 0.5);
-      this.fx.burst(b.p, 0xffffff, 20, 4, 0.3);
+      this.fx.burst(b.p, 0xff9a2a, 26, 7, 0.32);
+      this.fx.burst(b.p, 0xffffff, 10, 5, 0.2);
       this.w.arena.cheer(1);
       SV.audio.play('cheer', 0.8);
     } else if (power === 'feint') {
@@ -424,7 +421,7 @@ SV.Match = class {
         const high = atNet.y < SV.CONFIG.COURT.NET_H + 1.05;
         let ok = inAir && near && high;
         if (ok && !blocker.human) ok = SV.AI.blockSucceeds(power === 'super');
-        if (ok && blocker.human && power === 'super') ok = Math.random() < 0.6;
+        if (ok && blocker.human) ok = Math.random() < (power === 'super' ? 0.4 : 0.75);
         if (ok) {
           this.blockEvent = { t: this.t + tn, pos: new THREE.Vector3(atNet.x, atNet.y, -s * 0.0 + s * 0.25), blocker, attacker: p, kill: yAt > 0.45 && Math.random() < 0.7 };
           return;
@@ -568,7 +565,7 @@ SV.Match = class {
         if (action && tp > 0.15) {
           const d = Math.abs(tp - peak);
           const T = SV.CONFIG.TIMING;
-          this.hitServe(d < T.PERFECT * 1.3 ? 'PERFECT' : d < T.GOOD * 1.4 ? 'GOOD' : 'OK', dir);
+          this.hitServe(d < T.PERFECT * 1.6 ? 'PERFECT' : d < T.GOOD * 1.4 ? 'GOOD' : 'OK', dir);
         } else if (this.ball.p.y < 1.25 && this.ball.v.y < 0) this.hitServe('OK', dir);
       } else {
         if (!this.aiServeAt) this.aiServeAt = peak + SV.util.rand(-0.05, 0.05);

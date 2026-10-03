@@ -10,8 +10,13 @@
     stage.style.left = (window.innerWidth - CFG.WIDTH * s) / 2 + 'px';
     stage.style.top = (window.innerHeight - CFG.HEIGHT * s) / 2 + 'px';
   }
+  // resize イベントが来ない環境（埋め込み・エミュレーション）もあるので毎フレームもサイズ監視
+  let lastW = 0, lastH = 0;
+  function fitIfChanged() {
+    if (window.innerWidth !== lastW || window.innerHeight !== lastH) { lastW = window.innerWidth; lastH = window.innerHeight; fit(); }
+  }
   window.addEventListener('resize', fit);
-  fit();
+  fitIfChanged();
 
   if (typeof THREE === 'undefined') {
     document.getElementById('gl').innerHTML = '<div style="color:#fff;padding:40px;font-size:24px">three.js を読み込めませんでした（ネット接続を確認してください）</div>';
@@ -65,6 +70,7 @@
   }
   match.onEnd = (winner) => {
     if (mode === 'demo') { startDemo(); return; }
+    if (SV.debug.autoPlay) { startGame(); return; }
     mode = 'result';
     const win = winner === 0;
     SV.ui.result(true, win ? 'YOU WIN!' : 'YOU LOSE...', `${match.score[0]} - ${match.score[1]}`);
@@ -94,10 +100,12 @@
   document.querySelectorAll('.menu button').forEach((b) => b.addEventListener('pointerdown', (e) => e.stopPropagation()));
 
   // ---- ループ ----
-  startDemo();
+  SV.debug.install(match);
+  if (SV.debug.autoPlay) startGame(); else startDemo();
   let last = performance.now();
   function loop(now) {
     requestAnimationFrame(loop);
+    fitIfChanged();
     let dt = (now - last) / 1000; last = now;
     if (dt > 0.05) dt = 0.05; // タブ復帰時などの大ジャンプを抑制
     if (mode === 'demo') {
