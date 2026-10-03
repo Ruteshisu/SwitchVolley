@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>SPIKE STADIUM - Volley</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="stage">
+  <div id="gl"></div>
+
+  <!-- HUD -->
+  <div id="hud">
+    <div id="scoreboard">
+      <div class="team blue"><span class="name">BLUE</span><span class="score" id="scoreA">0</span></div>
+      <div class="center"><div id="serveInfo">SERVE</div><div id="matchPoint"></div></div>
+      <div class="team red"><span class="score" id="scoreB">0</span><span class="name">RED</span></div>
+    </div>
+    <div id="banner"></div>
+    <div id="subBanner"></div>
+    <div id="hint"></div>
+    <div id="judge"></div>
+    <div id="demoTag">DEMO PLAY</div>
+  </div>
+
+  <!-- タイトル -->
+  <div id="title" class="overlay">
+    <div class="logo"><span class="l1">SPIKE</span><span class="l2">STADIUM</span></div>
+    <div class="tag">2 vs 2 VOLLEYBALL</div>
+    <div class="press" id="pressStart">PRESS ENTER / TAP TO START</div>
+    <div class="howto">
+      <div><b>移動</b> 矢印 / WASD（自動移動を補正）</div>
+      <div><b>アクション</b> Space / J — レシーブ・トス・スパイク・ブロック・サーブ</div>
+      <div><b>スパイク</b> 押してジャンプ → 空中でもう一度！</div>
+      <div><b>P</b> ポーズ　<b>M</b> 音声</div>
+    </div>
+  </div>
+
+  <!-- ポーズ / リザルト -->
+  <div id="pause" class="overlay hidden">
+    <div class="big">PAUSE</div>
+    <div class="menu"><button data-act="resume">つづける</button><button data-act="title">タイトルへ</button></div>
+  </div>
+  <div id="result" class="overlay hidden">
+    <div class="big" id="resultText">YOU WIN!</div>
+    <div class="final" id="resultScore">7 - 5</div>
+    <div class="menu"><button data-act="retry">もう一度</button><button data-act="title">タイトルへ</button></div>
+  </div>
+
+  <!-- 仮想パッド（タッチ端末で表示） -->
+  <div id="vpad" class="hidden">
+    <div id="dpad">
+      <div class="dbtn up" data-dir="up">▲</div>
+      <div class="dbtn left" data-dir="left">◀</div>
+      <div class="dbtn right" data-dir="right">▶</div>
+      <div class="dbtn down" data-dir="down">▼</div>
+    </div>
+    <div id="abtn">A</div>
+    <div id="sysbtns"><div class="sbtn" id="vPause">Ⅱ</div><div class="sbtn" id="vMute">♪</div></div>
+  </div>
+
+  <div id="soundNote">クリック / キー入力で音が出ます</div>
+</div>
+<div id="rotate">横向きにしてね ⟲</div>
+
+<!-- three.js（唯一の外部ライブラリ） -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<!-- 依存順に読み込み -->
+<script src="js/config.js"></script>
+<script src="js/util.js"></script>
+<script src="js/textures.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/input.js"></script>
+<script src="js/character.js"></script>
+<script src="js/arena.js"></script>
+<script src="js/ball.js"></script>
+<script src="js/effects.js"></script>
+<script src="js/ai.js"></script>
+<script src="js/camera.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/match.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
